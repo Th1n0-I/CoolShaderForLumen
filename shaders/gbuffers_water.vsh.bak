@@ -1,0 +1,52 @@
+/*#version 330 compatibility
+
+#include "lib/spaceConversion.glsl"
+
+out vec2 lmcoord;
+out vec2 texcoord;
+out vec4 glcolor;
+out vec3 normal;
+
+uniform int worldTime;
+
+void main() {
+    gl_Position = ftransform(); // base position, untouched
+
+    // Get world pos just to know WHERE we are (for the sine input)
+    vec4 viewPos = gl_ModelViewMatrix * gl_Vertex;
+    vec3 worldPos = (gbufferModelViewInverse * viewPos).xyz + cameraPosition;
+
+    // Compute wave offset in world space
+    float wave = sin((worldPos.x + worldPos.z + worldTime * 0.02) * 3.141592653598987) * 0.01;
+    vec3 worldOffset = vec3(0.0, wave, 0.0);
+
+    // Transform just the offset to clip space and add it
+    vec3 viewOffset = mat3(gbufferModelView) * worldOffset;
+    gl_Position += gl_ProjectionMatrix * vec4(viewOffset, 0.0);
+
+    texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+    lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+    glcolor = gl_Color;
+
+    normal = gl_NormalMatrix * gl_Normal;
+    normal = mat3(gbufferModelViewInverse) * normal;
+}*/
+
+#version 330 compatibility
+
+out vec2 lmcoord;
+out vec2 texcoord;
+out vec4 glcolor;
+out vec3 normal;
+
+uniform mat4 gbufferModelViewInverse;
+
+void main() {
+    gl_Position = ftransform();
+    texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+    lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+    glcolor = gl_Color;
+
+    normal = gl_NormalMatrix * gl_Normal;
+    normal = mat3(gbufferModelViewInverse) * normal;
+}
